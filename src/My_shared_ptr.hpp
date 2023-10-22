@@ -77,6 +77,11 @@ public:
         return *this;
     };
 
+    Type* get() const noexcept
+    {
+        return _data;
+    };
+
     Type& operator*() const noexcept
     {
         return *_data;
@@ -85,6 +90,16 @@ public:
     Type* operator->() const noexcept
     {
         return _data;
+    };
+
+    void reset()
+    {
+        *this = std::move(My_shared_ptr());
+    };
+
+    void reset(Type* ptr)
+    {
+        *this = std::move(My_shared_ptr<Type>(ptr));
     };
 
     explicit operator bool() const noexcept
