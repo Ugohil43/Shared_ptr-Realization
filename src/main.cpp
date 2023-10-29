@@ -65,9 +65,20 @@ void check_ptr()
     sharedPtr1 = std::move(sharedPtr2);
     std::cout << "Data sharedPtr1: " << *sharedPtr1 << std::endl;
     std::cout << "Use_count sharedPtr1: " << sharedPtr1.use_count() << std::endl;
-    std::cout << "sharedPtr2.bool() " << sharedPtr2.operator bool() << std::endl;
+    std::cout << "sharedPtr2.bool() " << sharedPtr2.operator bool() << std::endl << std::endl;
     //std::cout << "Data sharedPtr2: " << *sharedPtr2 << std::endl; 
     //std::cout << "Use_count sharedPtr2: " << sharedPtr2.use_count() << std::endl << std::endl;
+
+    std::cout << "test operator[](std::size_t index)" << std::endl;
+    My_shared_ptr<int> p5(new int[10]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+    for (std::size_t i = 0; i < 10; ++i)
+        std::cout << p5[i] << ' ';
+    std::cout << std::endl << std::endl;
+
+    std::cout << "test make_shared()" << std::endl;
+    auto p6 = My_shared_ptr<int>::make_shared(42);
+    std::cout << "Use_count p6: " << p6.use_count() << std::endl;
+    std::cout << "Data p6: " << *p6 << std::endl;
 }
 
 int main()

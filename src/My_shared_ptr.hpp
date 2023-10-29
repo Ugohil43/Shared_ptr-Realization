@@ -15,7 +15,7 @@ private:
         {
             return;
         }
-        if ((*_count)-- == 0)
+        if (--(*_count) == 0)
         {
             delete _data;
             delete _count;
@@ -40,7 +40,7 @@ public:
     {
         this->_data = r._data;
         this->_count = r._count;
-        (*_count)++;
+        ++(*_count);
     };
 
     ~My_shared_ptr()
@@ -50,31 +50,51 @@ public:
 
     My_shared_ptr& operator=(const My_shared_ptr& r) noexcept
     {
-        if (this == &r)
+        if (this != &r)
         {
-            return *this;
-        }
-        //this->~My_shared_ptr();
-        preDestruct();
+        //preDestruct();
+        reset();
         this->_data = r._data;
-        this->_count =r._count;
-        (*_count)++;
+        this->_count = r._count;
+        ++(*_count);
+        }
         return *this;
     };
 
     My_shared_ptr& operator=(My_shared_ptr&& r) noexcept
     {
-        if (this == &r)
+        if (this != &r)
         {
-            return *this;
-        }
-        //this->~My_shared_ptr();
-        preDestruct();
+        //preDestruct();
+        reset();
         this->_data = r._data;
         this->_count = r._count;
         r._data = nullptr;
         r._count = nullptr;
+        }
         return *this;
+    };
+
+    void reset()
+    {
+        if (_count && --(*_count) == 0) // проверка на последний указатель
+        {
+            delete _data;
+            delete _count;
+        }
+        _data = nullptr;
+        _count = nullptr;  
+    };
+
+    void reset(Type* ptr)
+    {
+        *this = std::move(My_shared_ptr<Type>(ptr));
+    };
+
+    void swap(My_shared_ptr& r)
+    {
+        std::swap(this->_data, r._data);
+        std::swap(this->_count, r._count);
     };
 
     Type* get() const noexcept
@@ -92,14 +112,21 @@ public:
         return _data;
     };
 
-    void reset()
+    Type& operator[](std::size_t index)  // оператор индексации
     {
-        *this = std::move(My_shared_ptr());
+        if (_data && index >= 0) // проверка на ненулевой указкатель и индекс >= 0
+        {
+            return _data[index];
+        } 
+        else 
+        {
+            throw std::out_of_range("Index out of bounds");
+        }
     };
 
-    void reset(Type* ptr)
+    unsigned int use_count()
     {
-        *this = std::move(My_shared_ptr<Type>(ptr));
+        return (*_count);
     };
 
     explicit operator bool() const noexcept
@@ -116,15 +143,15 @@ public:
         }
     };
 
-    void swap(My_shared_ptr& r)
+    bool owner_before(const My_shared_ptr<Type>& r) const noexcept
     {
-        std::swap(this->_data, r._data);
-        std::swap(this->_count, r._count);
+        return this->_count < r._count; // true - текущий объект владеет данными до объекта r
     };
 
-    unsigned int use_count()
+    template <typename... Args>
+    static My_shared_ptr<Type> make_shared(Args&&... args) 
     {
-        return (*_count);
+        return My_shared_ptr<Type>(new Type(std::forward<Args>(args)...));
     };
 };
 
